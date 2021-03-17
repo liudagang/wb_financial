@@ -1,0 +1,16 @@
+/.idea
+/.vscode
+/.svn
+*.log
+.env
+config/install/lock/install.lock
+/public/upload
+/public/docs
+runtime/admin
+runtime/log
+runtime/session
+runtime/temp
+public/conf
+public/WowOss.exe
+composer.phar
+app/test/
