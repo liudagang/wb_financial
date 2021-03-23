@@ -183,6 +183,7 @@ define(["jquery", "tableSelect", "ckeditor"], function ($, tableSelect, undefine
                 options.limit = options.limit || 15;
                 options.limits = options.limits || [10, 15, 20, 25, 50, 100];
                 options.cols = options.cols || [];
+                options.autoSort = false;
                 options.defaultToolbar = (options.defaultToolbar === undefined && !options.search) ? ['filter', 'print', 'exports'] : ['filter', 'print', 'exports', {
                     title: '搜索',
                     layEvent: 'TABLE_SEARCH',
@@ -493,10 +494,12 @@ define(["jquery", "tableSelect", "ckeditor"], function ($, tableSelect, undefine
                         }
 
                         // 部分字段开启排序
-                        var sortDefaultFields = ['id', 'sort'];
-                        if (val.sort === undefined && sortDefaultFields.indexOf(val.field) >= 0) {
+                        // var sortDefaultFields = ['id', 'sort'];
+                        // if (val.sort === undefined && sortDefaultFields.indexOf(val.field) >= 0) {
+                        if( val.nosort === undefined ){
                             cols[i][index]['sort'] = true;
                         }
+                        // }
 
                         // 初始化图片高度
                         if (val.templet === admin.table.image && val.imageHeight === undefined) {

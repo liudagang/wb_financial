@@ -182,8 +182,13 @@ class AdminController extends BaseController
                     break;
                 case 'range':
                     [$beginTime, $endTime] = explode(' - ', $val);
-                    $where[] = [$key, '>=', strtotime($beginTime)];
-                    $where[] = [$key, '<=', strtotime($endTime)];
+                    if( $key != 'income_date' ){
+                        $where[] = [$key, '>=', strtotime($beginTime)];
+                        $where[] = [$key, '<=', strtotime($endTime)];
+                    } else {
+                        $where[] = [$key, '>=', $beginTime];
+                        $where[] = [$key, '<=', $endTime];
+                    }
                     break;
                 default:
                     $where[] = [$key, $op, "%{$val}"];
