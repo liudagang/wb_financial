@@ -94,19 +94,6 @@ class Income extends AdminController
         return $this->fetch();
     }
 
-    private function _getCol($field, $model=false)
-    {
-        if(!$model){
-            $model = $this->model;
-        }
-        $rs = $model->field(sprintf('distinct(%s) as %s', $field, $field))->select()->toArray();
-        $list = array();
-        foreach($rs as $row){
-            $list[$row[$field]] = $row[$field];
-        }
-        return $list;
-    }
-
     /**
      * @NodeAnotation(title="添加")
      */

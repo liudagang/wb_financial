@@ -1,30 +1,27 @@
 <?php
 
-// +----------------------------------------------------------------------
-// | EasyAdmin
-// +----------------------------------------------------------------------
-// | PHP交流群: 763822524
-// +----------------------------------------------------------------------
-// | 开源协议  https://mit-license.org 
-// +----------------------------------------------------------------------
-// | github开源项目：https://github.com/zhongshaofa/EasyAdmin
-// +----------------------------------------------------------------------
+namespace app\admin\controller\cw;
 
-namespace app\admin\traits;
-
+use app\common\controller\AdminController;
+use EasyAdmin\annotation\ControllerAnnotation;
 use EasyAdmin\annotation\NodeAnotation;
-use EasyAdmin\tool\CommonTool;
-use jianyan\excel\Excel;
-use think\facade\Db;
+use think\App;
 
 /**
- * 后台CURD复用
- * Trait Curd
- * @package app\admin\traits
+ * @ControllerAnnotation(title="cw_client")
  */
-trait Curd
+class Client extends AdminController
 {
 
+    use \app\admin\traits\Curd;
+
+    public function __construct(App $app)
+    {
+        parent::__construct($app);
+
+        $this->model = new \app\admin\model\CwClient();
+        
+    }
 
     /**
      * @NodeAnotation(title="列表")
@@ -39,10 +36,17 @@ trait Curd
             $count = $this->model
                 ->where($where)
                 ->count();
+
+            $sort = $this->sort;
+            if( isset($_GET['field']) ){
+                $sort = [
+                    $_GET['field'] => $_GET['order']
+                ];
+            }
             $list = $this->model
                 ->where($where)
                 ->page($page, $limit)
-                ->order($this->sort)
+                ->order($sort)
                 ->select();
             $data = [
                 'code'  => 0,
@@ -64,6 +68,13 @@ trait Curd
             $post = $this->request->post();
             $rule = [];
             $this->validate($post, $rule);
+
+            // 检查客户名是否冲突
+            $rs = $this->model->where(['name'=>$post['name']])->count();
+            if( $rs ){
+                $this->error('客户名称已存在');
+            }
+
             try {
                 $save = $this->model->save($post);
             } catch (\Exception $e) {
@@ -71,6 +82,17 @@ trait Curd
             }
             $save ? $this->success('保存成功') : $this->error('保存失败');
         }
+
+
+        // get options
+        $this->assign('states', $this->_getCol('state'));
+        $this->assign('codes', $this->_getCol('code'));
+        $this->assign('types', $this->_getCol('type'));
+        $this->assign('tax_types', $this->_getCol('tax_type'));
+        $this->assign('names', $this->_getCol('name'));
+        $this->assign('srcs', $this->_getCol('src'));
+        $this->assign('levels', $this->_getCol('level'));
+
         return $this->fetch();
     }
 
@@ -92,7 +114,16 @@ trait Curd
             }
             $save ? $this->success('保存成功') : $this->error('保存失败');
         }
-        $this->assign('row', $row);
+        $this->assign('data', $row);
+
+        // get options
+        $this->assign('states', $this->_getCol('state'));
+        $this->assign('codes', $this->_getCol('code'));
+        $this->assign('types', $this->_getCol('type'));
+        $this->assign('tax_types', $this->_getCol('tax_type'));
+        $this->assign('names', $this->_getCol('name'));
+        $this->assign('srcs', $this->_getCol('src'));
+        $this->assign('levels', $this->_getCol('level'));
         return $this->fetch();
     }
 
@@ -136,47 +167,5 @@ trait Curd
             ->toArray();
         $fileName = time();
         return Excel::exportData($list, $header, $fileName, 'xlsx');
-    }
-
-    /**
-     * @NodeAnotation(title="属性修改")
-     */
-    public function modify()
-    {
-        $post = $this->request->post();
-        $rule = [
-            'id|ID'    => 'require',
-            'field|字段' => 'require',
-            'value|值'  => 'require',
-        ];
-        $this->validate($post, $rule);
-        $row = $this->model->find($post['id']);
-        if (!$row) {
-            $this->error('数据不存在');
-        }
-        if (!in_array($post['field'], $this->allowModifyFields)) {
-            $this->error('该字段不允许修改：' . $post['field']);
-        }
-        try {
-            $row->save([
-                $post['field'] => $post['value'],
-            ]);
-        } catch (\Exception $e) {
-            $this->error($e->getMessage());
-        }
-        $this->success('保存成功');
-    }
-
-    protected function _getCol($field, $model=false)
-    {
-        if(!$model){
-            $model = $this->model;
-        }
-        $rs = $model->field(sprintf('distinct(%s) as %s', $field, $field))->select()->toArray();
-        $list = array();
-        foreach($rs as $row){
-            $list[$row[$field]] = $row[$field];
-        }
-        return $list;
     }
 }

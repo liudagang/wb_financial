@@ -1,0 +1,118 @@
+<div class="layuimini-container">
+    <form id="app-form" class="layui-form layuimini-form">
+        
+        <div class="layui-form-item">
+            <label class="layui-form-label required" _name="state">状态</label>
+            <div class="layui-input-block">
+                <select lay-verify="" lay-search lay-filter="type">
+                    <option value="">请输入</option>
+                    <?php foreach($states as $row){ ?>
+                        <option value="<?=$row?>"<?=$row==$data['state']?' selected="selected"':''?>><?=$row?></option>
+                    <?php } ?>
+                </select>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label required" _name="code">编号</label>
+            <div class="layui-input-block">
+                <select lay-verify="" lay-search lay-filter="type">
+                    <option value="">请输入</option>
+                    <?php foreach($codes as $row){ ?>
+                        <option value="<?=$row?>"<?=$row==$data['code']?' selected="selected"':''?>><?=$row?></option>
+                    <?php } ?>
+                </select>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label required" _name="type">类型</label>
+            <div class="layui-input-block">
+                <select lay-verify="" lay-search lay-filter="type">
+                    <option value="">请输入</option>
+                    <?php foreach($types as $row){ ?>
+                        <option value="<?=$row?>"<?=$row==$data['type']?' selected="selected"':''?>><?=$row?></option>
+                    <?php } ?>
+                </select>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label required" _name="tax_type">税务类型</label>
+            <div class="layui-input-block">
+                <select lay-verify="" lay-search lay-filter="type">
+                    <option value="">请输入</option>
+                    <?php foreach($tax_types as $row){ ?>
+                        <option value="<?=$row?>"<?=$row==$data['tax_type']?' selected="selected"':''?>><?=$row?></option>
+                    <?php } ?>
+                </select>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label required" _name="name">名称</label>
+            <div class="layui-input-block">
+                <select lay-verify="" lay-search lay-filter="type">
+                    <option value="">请输入</option>
+                    <?php foreach($names as $row){ ?>
+                        <option value="<?=$row?>"<?=$row==$data['name']?' selected="selected"':''?>><?=$row?></option>
+                    <?php } ?>
+                </select>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">联系人</label>
+            <div class="layui-input-block">
+                <input type="text" name="contact" class="layui-input" lay-verify="required" placeholder="请输入联系人" value="<?=$data['contact']?>">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">联系电话</label>
+            <div class="layui-input-block">
+                <input type="text" name="tel" class="layui-input" lay-verify="required"  placeholder="请输入联系电话" value="<?=$data['tel']?>">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">地址</label>
+            <div class="layui-input-block">
+                <input type="text" name="addr" class="layui-input" lay-verify="required" placeholder="请输入地址" value="<?=$data['addr']?>">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label required" _name="src">来源</label>
+            <div class="layui-input-block">
+                <select lay-verify="" lay-search lay-filter="type">
+                    <option value="">请输入</option>
+                    <?php foreach($srcs as $row){ ?>
+                        <option value="<?=$row?>"<?=$row==$data['src']?' selected="selected"':''?>><?=$row?></option>
+                    <?php } ?>
+                </select>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label required" _name="level">等级</label>
+            <div class="layui-input-block">
+                <select lay-verify="" lay-search lay-filter="type">
+                    <option value="">请输入</option>
+                    <?php foreach($levels as $row){ ?>
+                        <option value="<?=$row?>"<?=$row==$data['level']?' selected="selected"':''?>><?=$row?></option>
+                    <?php } ?>
+                </select>
+            </div>
+        </div>
+        <div class="layui-form-item layui-form-text">
+            <label class="layui-form-label">备注</label>
+            <div class="layui-input-block">
+                <textarea name="remark" class="layui-textarea"  placeholder="请输入备注"><?=$data['remark']?></textarea>
+            </div>
+        </div>
+        <!-- <div class="layui-form-item">
+            <label class="layui-form-label">add_time</label>
+            <div class="layui-input-block">
+                <input type="text" name="add_time" class="layui-input"  placeholder="请输入add_time" value="">
+            </div>
+        </div> -->
+        <div class="hr-line"></div>
+        <div class="layui-form-item text-center">
+            <button type="submit" class="layui-btn layui-btn-normal layui-btn-sm" lay-submit>确认</button>
+            <button type="reset" class="layui-btn layui-btn-primary layui-btn-sm">重置</button>
+        </div>
+
+    </form>
+</div>

@@ -14,10 +14,7 @@ define(["jquery", "easy-admin"], function ($, ea) {
     var Controller = {
 
         index: function () {
-            // get search options
-
-
-            var tb = ea.table.render({
+            ea.table.render({
                 init: init,
                 toolbar: ['refresh','add'],
                 cols: [[
