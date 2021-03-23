@@ -67,15 +67,42 @@ define(["jquery", "easy-admin"], function ($, ea) {
                 ,range: true //或 range: '~' 来自定义分割字符
             });
 
-            // console.log(window);
-            // jQuery('#type_select')[0].removeEventListener('blur', window.getEventListeners(jQuery('#type_select')[0]).blur[0].listener)
+            layui.laydate.render({ 
+                elem: '#income_date'
+                ,type: 'date'
+            });
 
             ea.listen();
+
+            jQuery('.layui-form-item .required').each(function(){
+                var input = jQuery(this).parent().find('input[type=text]');
+                input.attr('lay-verify', 'required');
+                input.attr('autocomplete', 'off');
+                input.attr('name', jQuery(this).attr('_name'));
+            });
         },
 
         
         edit: function () {
+            layui.laydate.render({ 
+                elem: '#service_time'
+                ,type: 'date'
+                ,range: true //或 range: '~' 来自定义分割字符
+            });
+
+            layui.laydate.render({ 
+                elem: '#income_date'
+                ,type: 'date'
+            });
+
             ea.listen();
+
+            jQuery('.layui-form-item .required').each(function(){
+                var input = jQuery(this).parent().find('input[type=text]');
+                input.attr('lay-verify', 'required');
+                input.attr('autocomplete', 'off');
+                input.attr('name', jQuery(this).attr('_name'));
+            });
         },
     };
     return Controller;

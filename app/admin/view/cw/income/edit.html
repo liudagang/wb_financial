@@ -1,78 +1,104 @@
 <div class="layuimini-container">
-    <form id="app-form" class="layui-form layuimini-form">
+    <form id="app-form" class="layui-form layuimini-form" lay-filter="addform">
         
         <div class="layui-form-item">
-            <label class="layui-form-label">fee</label>
+            <label class="layui-form-label">金额</label>
             <div class="layui-input-block">
-                <input type="text" name="fee" class="layui-input" lay-verify="required" placeholder="请输入fee" value="{$row.fee|default=''}">
+                <input type="text" name="fee" class="layui-input" lay-verify="required" placeholder="请输入金额" value="{$data.fee|default=''}">
             </div>
         </div>
         <div class="layui-form-item">
-            <label class="layui-form-label">service_start</label>
+            <label class="layui-form-label">服务期间</label>
             <div class="layui-input-block">
-                <input type="text" name="service_start" class="layui-input" lay-verify="required" placeholder="请输入service_start" value="{$row.service_start|default=''}">
+                <input type="text" name="service_time" id="service_time" class="layui-input" lay-verify="required" placeholder="请输入服务期间" value="{$data.service_time|default=''}" autocomplete="off">
             </div>
         </div>
-        <div class="layui-form-item">
+        <!-- <div class="layui-form-item">
             <label class="layui-form-label">service_end</label>
             <div class="layui-input-block">
-                <input type="text" name="service_end" class="layui-input" lay-verify="required" placeholder="请输入service_end" value="{$row.service_end|default=''}">
+                <input type="text" name="service_end" class="layui-input" lay-verify="required" placeholder="请输入service_end" value="">
+            </div>
+        </div> -->
+        <div class="layui-form-item" style="height:38px;">
+            <label class="layui-form-label required" _name="type">服务类型</label>
+            <div class="layui-input-block">
+                <select lay-verify="" lay-search lay-filter="type" id="type_select" lay-verify="required" >
+                    <option value="">请输入</option>
+                    <?php foreach($types as $type){ ?>
+                        <option value="<?=$type?>"<?=$type==$data['type']?' selected="selected"':''?>><?=$type?></option>
+                    <?php } ?>
+                </select>   
             </div>
         </div>
         <div class="layui-form-item">
-            <label class="layui-form-label">type</label>
+            <label class="layui-form-label required">客户</label>
             <div class="layui-input-block">
-                <input type="text" name="type" class="layui-input" lay-verify="required" placeholder="请输入type" value="{$row.type|default=''}">
+                <!-- <input type="text" name="client_id" class="layui-input" lay-verify="required" placeholder="请输入client_id" value=""> -->
+                <select lay-verify="" lay-filter="type" name="client_name" id="client_select">
+                    <option value="">请选择</option>
+                    <?php foreach($clients as $row){ ?>
+                        <option value="<?=$row?>"<?=$row==$data['client_name']?' selected="selected"':''?>><?=$row?></option>
+                    <?php } ?>
+                </select>   
             </div>
         </div>
         <div class="layui-form-item">
-            <label class="layui-form-label">client_id</label>
+            <label class="layui-form-label required" _name="account">收入账户</label>
             <div class="layui-input-block">
-                <input type="text" name="client_id" class="layui-input" lay-verify="required" placeholder="请输入client_id" value="{$row.client_id|default=''}">
+                <select lay-verify="" lay-search lay-filter="type" id="account_select">
+                    <option value="">请输入</option>
+                    <?php foreach($accounts as $row){ ?>
+                        <option value="<?=$row?>"<?=$row==$data['account']?' selected="selected"':''?>><?=$row?></option>
+                    <?php } ?>
+                </select>   
             </div>
         </div>
         <div class="layui-form-item">
-            <label class="layui-form-label">account</label>
+            <label class="layui-form-label required" _name="project">收入项目</label>
             <div class="layui-input-block">
-                <input type="text" name="account" class="layui-input" lay-verify="required" placeholder="请输入account" value="{$row.account|default=''}">
+                <select lay-verify="" lay-search lay-filter="type" id="project_select">
+                    <option value="">请输入</option>
+                    <?php foreach($projects as $row){ ?>
+                        <option value="<?=$row?>"<?=$row==$data['project']?' selected="selected"':''?>><?=$row?></option>
+                    <?php } ?>
+                </select>  
             </div>
         </div>
         <div class="layui-form-item">
-            <label class="layui-form-label">project</label>
+            <label class="layui-form-label">收款日期</label>
             <div class="layui-input-block">
-                <input type="text" name="project" class="layui-input" lay-verify="required" placeholder="请输入project" value="{$row.project|default=''}">
-            </div>
-        </div>
-        <div class="layui-form-item">
-            <label class="layui-form-label">income_date</label>
-            <div class="layui-input-block">
-                <input type="text" name="income_date" class="layui-input" lay-verify="required" placeholder="请输入income_date" value="{$row.income_date|default=''}">
+                <input type="text" name="income_date" id="income_date" autocomplete="off" class="layui-input" lay-verify="required" placeholder="请输入收款日期" value="<?=$data['income_date']?>">
             </div>
         </div>
         <div class="layui-form-item layui-form-text">
-            <label class="layui-form-label">remark</label>
+            <label class="layui-form-label">备注</label>
             <div class="layui-input-block">
-                <textarea name="remark" class="layui-textarea" lay-verify="required" placeholder="请输入remark">{$row.remark|raw|default=''}</textarea>
+                <textarea name="remark" class="layui-textarea" placeholder="请输入备注"><?=$data['remark']?></textarea>
             </div>
         </div>
         <div class="layui-form-item">
-            <label class="layui-form-label">handler</label>
+            <label class="layui-form-label required" _name="handler">经手人</label>
             <div class="layui-input-block">
-                <input type="text" name="handler" class="layui-input" lay-verify="required" placeholder="请输入handler" value="{$row.handler|default=''}">
+                <select lay-verify="" lay-search lay-filter="type" id="project_select">
+                    <option value="">请输入</option>
+                    <?php foreach($handlers as $row){ ?>
+                        <option value="<?=$row?>"<?=$row==$data['handler']?' selected="selected"':''?>><?=$row?></option>
+                    <?php } ?>
+                </select>  
             </div>
         </div>
-        <div class="layui-form-item">
+        <!-- <div class="layui-form-item">
             <label class="layui-form-label">from_receivable</label>
             <div class="layui-input-block">
-                <input type="text" name="from_receivable" class="layui-input" lay-verify="required" placeholder="请输入from_receivable" value="{$row.from_receivable|default=''}">
+                <input type="text" name="from_receivable" class="layui-input" lay-verify="required" placeholder="请输入from_receivable" value="0">
             </div>
         </div>
         <div class="layui-form-item">
             <label class="layui-form-label">add_time</label>
             <div class="layui-input-block">
-                <input type="text" name="add_time" class="layui-input" lay-verify="required" placeholder="请输入add_time" value="{$row.add_time|default=''}">
+                <input type="text" name="add_time" class="layui-input" lay-verify="required" placeholder="请输入add_time" value="">
             </div>
-        </div>
+        </div> -->
         <div class="hr-line"></div>
         <div class="layui-form-item text-center">
             <button type="submit" class="layui-btn layui-btn-normal layui-btn-sm" lay-submit>确认</button>
@@ -82,10 +108,5 @@
     </form>
 </div>
 
-<script>
-g_opt = {
-    'client' : <?=json_encode($clients)?>,
-    'account' : <?=json_encode($accounts)?>,
-    'project' : <?=json_encode($projects)?>,
-};
-</script>
+
+    

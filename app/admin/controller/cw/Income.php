@@ -6,6 +6,7 @@ use app\common\controller\AdminController;
 use EasyAdmin\annotation\ControllerAnnotation;
 use EasyAdmin\annotation\NodeAnotation;
 use think\App;
+use app\admin\model\CwClient;
 
 /**
  * @ControllerAnnotation(title="cw_income")
@@ -93,9 +94,12 @@ class Income extends AdminController
         return $this->fetch();
     }
 
-    private function _getCol($field)
+    private function _getCol($field, $model=false)
     {
-        $rs = $this->model->field(sprintf('distinct(%s) as %s', $field, $field))->select()->toArray();
+        if(!$model){
+            $model = $this->model;
+        }
+        $rs = $model->field(sprintf('distinct(%s) as %s', $field, $field))->select()->toArray();
         $list = array();
         foreach($rs as $row){
             $list[$row[$field]] = $row[$field];
@@ -111,6 +115,13 @@ class Income extends AdminController
         if ($this->request->isAjax()) {
             $post = $this->request->post();
             $rule = [];
+
+            // 预处理
+            list($start, $end) = explode(' - ', $post['service_time']);
+            $post['service_start'] = $start;
+            $post['service_end'] = $end;
+            unset($post['service_time']);
+
             $this->validate($post, $rule);
             try {
                 $save = $this->model->save($post);
@@ -121,12 +132,14 @@ class Income extends AdminController
         }
 
         // get options
-        $clients = $this->_getCol('client_name');
+        $clients = $this->_getCol('name', new CwClient());
         $accounts = $this->_getCol('account');
         $projects = $this->_getCol('project');
         $types = $this->_getCol('type');
+        $handlers = $this->_getCol('handler');
 
         $this->assign('clients', $clients);
+        $this->assign('handlers', $handlers);
         $this->assign('types', $types);
         $this->assign('accounts', $accounts);
         $this->assign('projects', $projects);
@@ -143,6 +156,14 @@ class Income extends AdminController
         if ($this->request->isAjax()) {
             $post = $this->request->post();
             $rule = [];
+
+            // 预处理
+            list($start, $end) = explode(' - ', $post['service_time']);
+            $post['service_start'] = $start;
+            $post['service_end'] = $end;
+            unset($post['service_time']);
+
+
             $this->validate($post, $rule);
             try {
                 $save = $row->save($post);
@@ -151,7 +172,21 @@ class Income extends AdminController
             }
             $save ? $this->success('保存成功') : $this->error('保存失败');
         }
-        $this->assign('row', $row);
+        $row['service_time'] = sprintf('%s - %s', $row['service_start'], $row['service_end']);
+        $this->assign('data', $row);
+
+        // get options
+        $clients = $this->_getCol('name', new CwClient());
+        $accounts = $this->_getCol('account');
+        $projects = $this->_getCol('project');
+        $types = $this->_getCol('type');
+        $handlers = $this->_getCol('handler');
+
+        $this->assign('clients', $clients);
+        $this->assign('handlers', $handlers);
+        $this->assign('types', $types);
+        $this->assign('accounts', $accounts);
+        $this->assign('projects', $projects);
         return $this->fetch();
     }
 
