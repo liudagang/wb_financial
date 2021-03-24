@@ -1,0 +1,84 @@
+<div class="layuimini-container">
+    <form id="app-form" class="layui-form layuimini-form">
+        
+        <div class="layui-form-item">
+            <label class="layui-form-label">金额</label>
+            <div class="layui-input-block">
+                <input type="text" name="fee" class="layui-input" lay-verify="required" placeholder="请输入金额" value="">
+            </div>
+        </div>
+        <div class="layui-form-item" style="height:38px;">
+            <label class="layui-form-label required" _name="type">支出类型</label>
+            <div class="layui-input-block">
+                <select lay-verify="" lay-search lay-filter="type" id="type_select" lay-verify="required" >
+                    <option value="">请输入</option>
+                    <?php foreach($types as $type){ ?>
+                        <option value="<?=$type?>"><?=$type?></option>
+                    <?php } ?>
+                </select>   
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label required">供应商</label>
+            <div class="layui-input-block">
+                <select lay-verify="" lay-filter="type" name="supplier_name" id="supplier_select">
+                    <option value="">请选择</option>
+                    <?php foreach($suppliers as $row){ ?>
+                        <option value="<?=$row?>"><?=$row?></option>
+                    <?php } ?>
+                </select>   
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label required" _name="account">支出账户</label>
+            <div class="layui-input-block">
+                <select lay-verify="" lay-search lay-filter="type" id="account_select">
+                    <option value="">请输入</option>
+                    <?php foreach($accounts as $row){ ?>
+                        <option value="<?=$row?>"><?=$row?></option>
+                    <?php } ?>
+                </select>   
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label required" _name="project">支出项目</label>
+            <div class="layui-input-block">
+                <select lay-verify="" lay-search lay-filter="type" id="project_select">
+                    <option value="">请输入</option>
+                    <?php foreach($projects as $row){ ?>
+                        <option value="<?=$row?>"><?=$row?></option>
+                    <?php } ?>
+                </select>  
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">支出日期</label>
+            <div class="layui-input-block">
+                <input type="text" name="pay_date" id="pay_date" autocomplete="off" class="layui-input" lay-verify="required" placeholder="请输入支出日期" value="">
+            </div>
+        </div>
+        <div class="layui-form-item layui-form-text">
+            <label class="layui-form-label">备注</label>
+            <div class="layui-input-block">
+                <textarea name="remark" class="layui-textarea" placeholder="请输入备注"></textarea>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label required" _name="handler">经手人</label>
+            <div class="layui-input-block">
+                <select lay-verify="" lay-search lay-filter="type" id="project_select">
+                    <option value="">请输入</option>
+                    <?php foreach($handlers as $row){ ?>
+                        <option value="<?=$row?>"><?=$row?></option>
+                    <?php } ?>
+                </select>  
+            </div>
+        </div>
+        <div class="hr-line"></div>
+        <div class="layui-form-item text-center">
+            <button type="submit" class="layui-btn layui-btn-normal layui-btn-sm" lay-submit>确认</button>
+            <button type="reset" class="layui-btn layui-btn-primary layui-btn-sm">重置</button>
+        </div>
+
+    </form>
+</div>

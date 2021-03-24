@@ -3,13 +3,14 @@ define(["jquery", "easy-admin"], function ($, ea) {
     var init = {
         table_elem: '#currentTable',
         table_render_id: 'currentTableRenderId',
-        index_url: 'cw.income/index',
-        add_url: 'cw.income/add',
-        edit_url: 'cw.income/edit',
-        delete_url: 'cw.income/delete',
-        // export_url: 'cw.income/export',
-        // modify_url: 'cw.income/modify',
+        index_url: 'cw.payment/index',
+        add_url: 'cw.payment/add',
+        edit_url: 'cw.payment/edit',
+        delete_url: 'cw.payment/delete',
+        // export_url: 'cw.payment/export',
+        // modify_url: 'cw.payment/modify',
     };
+
 
     var Controller = {
 
@@ -18,22 +19,15 @@ define(["jquery", "easy-admin"], function ($, ea) {
                 init: init,
                 toolbar: ['refresh','add'],
                 cols: [[
-                    // {type: 'checkbox'},
                     {field: 'id', title: 'id', search: false},
                     {field: 'fee', title: '金额', search:false, totalRow: true},
-                    {field: 'service_time', title: '服务期间', search: false},
-                    // {field: 'service_end', title: '服务期间-结束'},
-                    {field: 'type', title: '收入类型', search:false},
-                    {field: 'client_name', title: '客户名称', search:'select', selectList:g_opt['client']},
-                    {field: 'account', title: '收入账户', search:'select', selectList:g_opt['account']},
-                    {field: 'income_date', title: '收款日期', search:'range', timeType:'date'},
-                    {field: 'project', title: '收入项目', search:'select', selectList:g_opt['project']},
+                    {field: 'type', title: '支出类型', search:false},
+                    {field: 'supplier_name', title: '供应商名称', search:'select', selectList:g_opt['supplier']},
+                    {field: 'account', title: '支出账户', search:'select', selectList:g_opt['account']},
+                    {field: 'pay_date', title: '支出日期', search:'range', timeType:'date'},
+                    {field: 'project', title: '支出项目', search:'select', selectList:g_opt['project']},
                     {field: 'remark', title: '备注', templet: ea.table.text, search:false, nosort:true},
-                    // {field: 'handler', title: 'handler'},
-                    // {field: 'from_receivable', title: 'from_receivable'},
-                    // {field: 'add_time', title: 'add_time'},
                     {width: 250, title: '操作', templet: ea.table.tool, nosort:true},
-
                 ]],
                 totalRow: true //开启合计行
             });
@@ -56,16 +50,11 @@ define(["jquery", "easy-admin"], function ($, ea) {
             ea.listen();
         },
 
-        byclient: function() {
+        bysupplier: function() {
             var init = {
                 table_elem: '#currentTable',
                 table_render_id: 'currentTableRenderId',
-                index_url: 'cw.income/byclient',
-                // add_url: 'cw.income/add',
-                // edit_url: 'cw.income/edit',
-                // delete_url: 'cw.income/delete',
-                // export_url: 'cw.income/export',
-                // modify_url: 'cw.income/modify',
+                index_url: 'cw.payment/bysupplier',
             };
 
             ea.table.render({
@@ -73,10 +62,10 @@ define(["jquery", "easy-admin"], function ($, ea) {
                 toolbar: ['refresh'],
                 cols: [[
                     // {type: 'checkbox'},
-                    {field: 'client_name', title: '客户名称', search:false, search: false},
+                    {field: 'supplier_name', title: '供应商', search:false, search: false},
                     {field: 'fee', title: '金额', search:false, totalRow: true},
                     {field: 'count', title: '笔数', search: false},
-                    {field: 'income_date', title: '收款日期', search:'range', timeType:'date', hide: true},
+                    {field: 'pay_date', title: '支出日期', search:'range', timeType:'date', hide: true},
                 ]],
                 totalRow: true //开启合计行
             });
@@ -103,7 +92,7 @@ define(["jquery", "easy-admin"], function ($, ea) {
             var init = {
                 table_elem: '#currentTable',
                 table_render_id: 'currentTableRenderId',
-                index_url: 'cw.income/byproject',
+                index_url: 'cw.payment/byproject',
                 // add_url: 'cw.income/add',
                 // edit_url: 'cw.income/edit',
                 // delete_url: 'cw.income/delete',
@@ -119,7 +108,7 @@ define(["jquery", "easy-admin"], function ($, ea) {
                     {field: 'project', title: '项目名称', search:false, search: false},
                     {field: 'fee', title: '金额', search:false, totalRow: true},
                     {field: 'count', title: '笔数', search: false},
-                    {field: 'income_date', title: '收款日期', search:'range', timeType:'date', hide: true},
+                    {field: 'pay_date', title: '支出日期', search:'range', timeType:'date', hide: true},
                 ]],
                 totalRow: true //开启合计行
             });
@@ -144,13 +133,7 @@ define(["jquery", "easy-admin"], function ($, ea) {
 
         add: function () {
             layui.laydate.render({ 
-                elem: '#service_time'
-                ,type: 'date'
-                ,range: true //或 range: '~' 来自定义分割字符
-            });
-
-            layui.laydate.render({ 
-                elem: '#income_date'
+                elem: '#pay_date'
                 ,type: 'date'
             });
 
@@ -167,13 +150,7 @@ define(["jquery", "easy-admin"], function ($, ea) {
         
         edit: function () {
             layui.laydate.render({ 
-                elem: '#service_time'
-                ,type: 'date'
-                ,range: true //或 range: '~' 来自定义分割字符
-            });
-
-            layui.laydate.render({ 
-                elem: '#income_date'
+                elem: '#pay_date'
                 ,type: 'date'
             });
 

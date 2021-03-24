@@ -2,33 +2,28 @@
 
 namespace app\admin\controller\cw;
 
+use app\admin\model\CwSupplier;
 use app\common\controller\AdminController;
 use EasyAdmin\annotation\ControllerAnnotation;
 use EasyAdmin\annotation\NodeAnotation;
 use think\App;
-use app\admin\model\CwClient;
 use think\facade\Db;
 
 /**
- * @ControllerAnnotation(title="cw_income")
+ * @ControllerAnnotation(title="cw_payment")
  */
-class Income extends AdminController
+class Payment extends AdminController
 {
 
     use \app\admin\traits\Curd;
-
-    protected $sort = [
-        'id' => 'desc',
-    ];
 
     public function __construct(App $app)
     {
         parent::__construct($app);
 
-        $this->model = new \app\admin\model\CwIncome();
+        $this->model = new \app\admin\model\CwPayment();
         
-    }   
-
+    }
 
     /**
      * @NodeAnotation(title="列表")
@@ -47,26 +42,15 @@ class Income extends AdminController
 
             $sort = $this->sort;
             if( isset($_GET['field']) ){
-                if( $_GET['field'] == 'service_time' ) {
-                    $sort = ['service_start' => $_GET['order']];
-                } else {
-                    $sort = [
-                        $_GET['field'] => $_GET['order']
-                    ];
-                }
+                $sort = [
+                    $_GET['field'] => $_GET['order']
+                ];
             }
             $list = $this->model
                 ->where($where)
                 ->page($page, $limit)
                 ->order($sort)
                 ->select();
-            // var_dump($this->model->getLastSql());exit;
-            // 处理一下服务期间
-            foreach($list as $key=>$row){
-                $list[$key]['service_time'] = sprintf('%s - %s', $row['service_start'], $row['service_end']);
-                unset($list[$key]['service_start']);
-                unset($list[$key]['service_end']);
-            }
 
             // 需要对数据进行汇总
             $totals = $this->model->where($where)->field('sum(fee) as fee')->select()->toArray();
@@ -85,11 +69,11 @@ class Income extends AdminController
         }
 
         // get options
-        $clients = $this->_getCol('client_name');
+        $suppliers = $this->_getCol('supplier_name');
         $accounts = $this->_getCol('account');
         $projects = $this->_getCol('project');
 
-        $this->assign('clients', $clients);
+        $this->assign('suppliers', $suppliers);
         $this->assign('accounts', $accounts);
         $this->assign('projects', $projects);
         return $this->fetch();
@@ -98,20 +82,19 @@ class Income extends AdminController
     /**
      * @NodeAnotation(title="按客户汇总")
      */
-    public function byclient()
+    public function bysupplier()
     {
-        $tbname = 'ea_cw_income';
+        $tbname = 'ea_cw_payment';
         if ($this->request->isAjax()) {
             if (input('selectFields')) {
                 return $this->selectList();
             }
 
-            // where: income_date
             list($page, $limit, $where) = $this->buildTableParames();
             // $count = $this->model
             //     ->where($where)
             //     ->count();
-            $count = Db::table($tbname)->where($where)->field('client_name')->group('client_name')->count();
+            $count = Db::table($tbname)->where($where)->field('supplier_name')->group('supplier_name')->count();
 
             $sort = ['fee'=>'desc'];
             if( isset($_GET['field']) ){
@@ -126,7 +109,7 @@ class Income extends AdminController
             //     ->order($sort)
             //     ->select();
 
-            $list = Db::table($tbname)->where($where)->field('client_name,sum(fee) as fee,count(*) as count')->group('client_name')->order($sort)->page($page, $limit)->select();
+            $list = Db::table($tbname)->where($where)->field('supplier_name,sum(fee) as fee,count(*) as count')->group('supplier_name')->order($sort)->page($page, $limit)->select();
 
 
             // 需要对数据进行汇总
@@ -138,7 +121,7 @@ class Income extends AdminController
                 'count' => $count,
                 'data'  => $list,
                 'totalRow' => [
-                    'client_name' => '汇总：',
+                    'supplier_name' => '汇总',
                     'fee' => sprintf('%0.2f', $totals[0]['fee']),
                 ]
             ];
@@ -154,7 +137,7 @@ class Income extends AdminController
      */
     public function byproject()
     {
-        $tbname = 'ea_cw_income';
+        $tbname = 'ea_cw_payment';
         if ($this->request->isAjax()) {
             if (input('selectFields')) {
                 return $this->selectList();
@@ -192,7 +175,7 @@ class Income extends AdminController
                 'count' => $count,
                 'data'  => $list,
                 'totalRow' => [
-                    'project' => '汇总：',
+                    'project' => '汇总',
                     'fee' => sprintf('%0.2f', $totals[0]['fee']),
                 ]
             ];
@@ -212,10 +195,7 @@ class Income extends AdminController
             $rule = [];
 
             // 预处理
-            list($start, $end) = explode(' - ', $post['service_time']);
-            $post['service_start'] = $start;
-            $post['service_end'] = $end;
-            unset($post['service_time']);
+
 
             $this->validate($post, $rule);
             try {
@@ -227,13 +207,13 @@ class Income extends AdminController
         }
 
         // get options
-        $clients = $this->_getCol('name', new CwClient());
+        $suppliers = $this->_getCol('name', new CwSupplier());
         $accounts = $this->_getCol('account');
         $projects = $this->_getCol('project');
         $types = $this->_getCol('type');
         $handlers = $this->_getCol('handler');
 
-        $this->assign('clients', $clients);
+        $this->assign('suppliers', $suppliers);
         $this->assign('handlers', $handlers);
         $this->assign('types', $types);
         $this->assign('accounts', $accounts);
@@ -253,11 +233,6 @@ class Income extends AdminController
             $rule = [];
 
             // 预处理
-            list($start, $end) = explode(' - ', $post['service_time']);
-            $post['service_start'] = $start;
-            $post['service_end'] = $end;
-            unset($post['service_time']);
-
 
             $this->validate($post, $rule);
             try {
@@ -271,13 +246,13 @@ class Income extends AdminController
         $this->assign('data', $row);
 
         // get options
-        $clients = $this->_getCol('name', new CwClient());
+        $suppliers = $this->_getCol('name', new CwSupplier());
         $accounts = $this->_getCol('account');
         $projects = $this->_getCol('project');
         $types = $this->_getCol('type');
         $handlers = $this->_getCol('handler');
 
-        $this->assign('clients', $clients);
+        $this->assign('suppliers', $suppliers);
         $this->assign('handlers', $handlers);
         $this->assign('types', $types);
         $this->assign('accounts', $accounts);
