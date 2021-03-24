@@ -7,6 +7,7 @@ use EasyAdmin\annotation\ControllerAnnotation;
 use EasyAdmin\annotation\NodeAnotation;
 use think\App;
 use app\admin\model\CwClient;
+use think\facade\Db;
 
 /**
  * @ControllerAnnotation(title="cw_income")
@@ -91,6 +92,59 @@ class Income extends AdminController
         $this->assign('clients', $clients);
         $this->assign('accounts', $accounts);
         $this->assign('projects', $projects);
+        return $this->fetch();
+    }
+
+    /**
+     * @NodeAnotation(title="按客户汇总")
+     */
+    public function byclient()
+    {
+        $tbname = 'ea_cw_income';
+        if ($this->request->isAjax()) {
+            if (input('selectFields')) {
+                return $this->selectList();
+            }
+
+            // where: income_date
+            list($page, $limit, $where) = $this->buildTableParames();
+            // $count = $this->model
+            //     ->where($where)
+            //     ->count();
+            $count = Db::table($tbname)->where($where)->field('client_name')->group('client_name')->count();
+
+            $sort = ['fee'=>'desc'];
+            if( isset($_GET['field']) ){
+                $sort = [
+                    $_GET['field'] => $_GET['order']
+                ];
+            }
+
+            // $list = $this->model
+            //     ->where($where)
+            //     ->page($page, $limit)
+            //     ->order($sort)
+            //     ->select();
+
+            $list = Db::table($tbname)->where($where)->field('client_name,sum(fee) as fee,count(*) as count')->group('client_name')->order($sort)->page($page, $limit)->select();
+
+
+            // 需要对数据进行汇总
+            $totals = $this->model->where($where)->field('sum(fee) as fee')->select()->toArray();
+
+            $data = [
+                'code'  => 0,
+                'msg'   => '',
+                'count' => $count,
+                'data'  => $list,
+                'totalRow' => [
+                    'client_name' => '汇总：',
+                    'fee' => sprintf('%0.2f', $totals[0]['fee']),
+                ]
+            ];
+            return json($data);
+        }
+
         return $this->fetch();
     }
 

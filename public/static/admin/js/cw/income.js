@@ -56,6 +56,48 @@ define(["jquery", "easy-admin"], function ($, ea) {
             ea.listen();
         },
 
+        byclient: function() {
+            var init = {
+                table_elem: '#currentTable',
+                table_render_id: 'currentTableRenderId',
+                index_url: 'cw.income/byclient',
+                // add_url: 'cw.income/add',
+                // edit_url: 'cw.income/edit',
+                // delete_url: 'cw.income/delete',
+                // export_url: 'cw.income/export',
+                // modify_url: 'cw.income/modify',
+            };
+
+            ea.table.render({
+                init: init,
+                toolbar: ['refresh','add'],
+                cols: [[
+                    // {type: 'checkbox'},
+                    {field: 'client_name', title: '客户名称', search:false, search: false},
+                    {field: 'fee', title: '金额', search:false, totalRow: true},
+                    {field: 'count', title: '笔数', search: false},
+                    {field: 'income_date', title: '收款日期', search:'range', timeType:'date', hide: true},
+                ]],
+                totalRow: true //开启合计行
+            });
+
+            layui.table.on('sort(currentTableRenderId_LayFilter)', function(obj){
+                console.log(obj.field); //当前排序的字段名
+                console.log(obj.type); //当前排序类型：desc（降序）、asc（升序）、null（空对象，默认排序）
+                console.log(obj); //当前排序的 th 对象
+
+                layui.table.reload('currentTableRenderId', {
+                    // initSort: obj //记录初始排序，如果不设的话，将无法标记表头的排序状态。
+                    where : {
+                        field: obj.field, //排序字段
+                        order: obj.type //排序方式
+                    }
+                  }, 'data');
+            });
+
+            ea.listen();
+        },
+
 
         add: function () {
             layui.laydate.render({ 
