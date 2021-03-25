@@ -10,7 +10,8 @@
 // +----------------------------------------------------------------------
 use think\facade\Route;
 
-Route::view('/', 'welcome', [
+Route::redirect('/', '/admin');
+Route::view('/test123', 'welcome', [
     'version' => time(),
     'data'    => [
         'description'        => '基于ThinkPHP6.0和Layui的快速开发的后台管理系统',
