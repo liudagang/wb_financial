@@ -1,0 +1,18 @@
+<div class="layuimini-container">
+    <div class="layuimini-main">
+        <table id="currentTable" class="layui-table layui-hide"
+               data-auth-add="{:auth('cw.receivable/add')}"
+               data-auth-edit="{:auth('cw.receivable/edit')}"
+               data-auth-delete="{:auth('cw.receivable/delete')}"
+               lay-filter="currentTable">
+        </table>
+    </div>
+</div>
+
+<script>
+    g_opt = {
+        'client' : <?=json_encode($clients)?>,
+        'project' : <?=json_encode($projects)?>,
+    };
+    </script>
+    
