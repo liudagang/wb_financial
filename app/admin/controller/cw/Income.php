@@ -7,6 +7,7 @@ use EasyAdmin\annotation\ControllerAnnotation;
 use EasyAdmin\annotation\NodeAnotation;
 use think\App;
 use app\admin\model\CwClient;
+use app\admin\model\CwReceivable;
 use think\facade\Db;
 
 /**
@@ -293,9 +294,23 @@ class Income extends AdminController
         $row = $this->model->whereIn('id', $id)->select();
         $row->isEmpty() && $this->error('数据不存在');
         try {
+            // 检查，是否有关联的应收，同时
+            $data = $row->toArray()[0];
+            if( $data['from_receivable'] ){
+                $m = new CwReceivable();
+                $r = $m->find($data['from_receivable']);
+                if( $r ){
+                    // reset
+                    $r->save(array(
+                        'received_fee' => $r['received_fee'] - $data['fee'],
+                        'unreceive_fee' => $r['unreceive_fee'] + $data['fee'],
+                    ));
+                }
+            }
+
             $save = $row->delete();
         } catch (\Exception $e) {
-            $this->error('删除失败');
+            $this->error('删除失败'.$e->getMessage());
         }
         $save ? $this->success('删除成功') : $this->error('删除失败');
     }
