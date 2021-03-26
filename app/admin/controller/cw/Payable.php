@@ -2,17 +2,18 @@
 
 namespace app\admin\controller\cw;
 
-use app\admin\model\CwSupplier;
+use app\admin\model\CwPayment;
 use app\common\controller\AdminController;
 use EasyAdmin\annotation\ControllerAnnotation;
 use EasyAdmin\annotation\NodeAnotation;
 use think\App;
+use app\admin\model\CwSupplier;
 use think\facade\Db;
 
 /**
- * @ControllerAnnotation(title="cw_payment")
+ * @ControllerAnnotation(title="cw_payable")
  */
-class Payment extends AdminController
+class Payable extends AdminController
 {
 
     use \app\admin\traits\Curd;
@@ -21,8 +22,8 @@ class Payment extends AdminController
     {
         parent::__construct($app);
 
-        $this->model = new \app\admin\model\CwPayment();
-        $this->allowModifyFields = ['fee'];  
+        $this->model = new \app\admin\model\CwPayable();
+        
     }
 
     /**
@@ -52,8 +53,15 @@ class Payment extends AdminController
                 ->order($sort)
                 ->select();
 
+            // 处理一下服务期间
+            foreach($list as $key=>$row){
+                $list[$key]['service_time'] = sprintf('%s - %s', $row['service_start'], $row['service_end']);
+                unset($list[$key]['service_start']);
+                unset($list[$key]['service_end']);
+            }
+
             // 需要对数据进行汇总
-            $totals = $this->model->where($where)->field('sum(fee) as fee')->select()->toArray();
+            $totals = $this->model->where($where)->field('sum(fee) as fee,sum(payed_fee) as payed_fee, sum(unpay_fee) as unpay_fee')->select()->toArray();
 
             $data = [
                 'code'  => 0,
@@ -63,6 +71,8 @@ class Payment extends AdminController
                 'totalRow' => [
                     'id' => '汇总：',
                     'fee' => sprintf('%0.2f', $totals[0]['fee']),
+                    'payed_fee' => sprintf('%0.2f', $totals[0]['payed_fee']),
+                    'unpay_fee' => sprintf('%0.2f', $totals[0]['unpay_fee']),
                 ]
             ];
             return json($data);
@@ -70,11 +80,9 @@ class Payment extends AdminController
 
         // get options
         $suppliers = $this->_getCol('supplier_name');
-        $accounts = $this->_getCol('account');
         $projects = $this->_getCol('project');
 
         $this->assign('suppliers', $suppliers);
-        $this->assign('accounts', $accounts);
         $this->assign('projects', $projects);
         return $this->fetch();
     }
@@ -84,7 +92,7 @@ class Payment extends AdminController
      */
     public function bysupplier()
     {
-        $tbname = 'ea_cw_payment';
+        $tbname = 'ea_cw_payable';
         if ($this->request->isAjax()) {
             if (input('selectFields')) {
                 return $this->selectList();
@@ -137,7 +145,7 @@ class Payment extends AdminController
      */
     public function byproject()
     {
-        $tbname = 'ea_cw_payment';
+        $tbname = 'ea_cw_payable';
         if ($this->request->isAjax()) {
             if (input('selectFields')) {
                 return $this->selectList();
@@ -195,7 +203,14 @@ class Payment extends AdminController
             $rule = [];
 
             // 预处理
+            list($start, $end) = explode(' - ', $post['service_time']);
+            $post['service_start'] = $start;
+            $post['service_end'] = $end;
+            unset($post['service_time']);
 
+            // 处理金额
+            $post['unreceive_fee'] = $post['fee'];
+            $post['add_time'] = date('Y-m-d H:i:s');
 
             $this->validate($post, $rule);
             try {
@@ -208,15 +223,12 @@ class Payment extends AdminController
 
         // get options
         $suppliers = $this->_getCol('name', new CwSupplier());
-        $accounts = $this->_getCol('account');
+
         $projects = $this->_getCol('project');
         $types = $this->_getCol('type');
-        $handlers = $this->_getCol('handler');
 
         $this->assign('suppliers', $suppliers);
-        $this->assign('handlers', $handlers);
         $this->assign('types', $types);
-        $this->assign('accounts', $accounts);
         $this->assign('projects', $projects);
         return $this->fetch();
     }
@@ -233,6 +245,12 @@ class Payment extends AdminController
             $rule = [];
 
             // 预处理
+            list($start, $end) = explode(' - ', $post['service_time']);
+            $post['service_start'] = $start;
+            $post['service_end'] = $end;
+            unset($post['service_time']);
+
+            $post['unreceive_fee'] = $post['fee'] - $row['received_fee'];
 
             $this->validate($post, $rule);
             try {
@@ -247,15 +265,11 @@ class Payment extends AdminController
 
         // get options
         $suppliers = $this->_getCol('name', new CwSupplier());
-        $accounts = $this->_getCol('account');
         $projects = $this->_getCol('project');
         $types = $this->_getCol('type');
-        $handlers = $this->_getCol('handler');
 
         $this->assign('suppliers', $suppliers);
-        $this->assign('handlers', $handlers);
         $this->assign('types', $types);
-        $this->assign('accounts', $accounts);
         $this->assign('projects', $projects);
         return $this->fetch();
     }
@@ -275,93 +289,53 @@ class Payment extends AdminController
         $save ? $this->success('删除成功') : $this->error('删除失败');
     }
 
-    /**
-     * @NodeAnotation(title="属性修改")
-     */
-    public function modify()
+    public function newpayment($id)
     {
-        $post = $this->request->post();
-        $rule = [
-            'id|ID'    => 'require',
-            'field|字段' => 'require',
-            'value|值'  => 'require',
-        ];
-        $this->validate($post, $rule);
-        $row = $this->model->find($post['id']);
-        if (!$row) {
-            $this->error('数据不存在');
-        }
-        if (!in_array($post['field'], $this->allowModifyFields)) {
-            $this->error('该字段不允许修改：' . $post['field']);
-        }
-        try {
-            if( $post['field'] == 'fee' ){
-                // 还要更新应收
-                if( $row['from_payable'] ){
-                    $m = new \app\admin\model\CwPayable();
-                    $r = $m->find($row['from_payable']);
-                    if( $r ){
-                        $payed_fee = $r['payed_fee'] + $post['value'] - $row['fee'];
-                        $unpay_fee = $r['fee'] - $payed_fee;
-                        $r->save([
-                            'payed_fee' => $payed_fee,
-                            'unpay_fee' => $unpay_fee,
-                        ]);
-                    }
-                }
-            }
-
-            $row->save([
-                $post['field'] => $post['value'],
-            ]);
-        } catch (\Exception $e) {
-            $this->error($e->getMessage());
-        }
-        $this->success('保存成功');
-    }
-
-
-    public function payable($id){
         if ($this->request->isAjax()) {
-            if (input('selectFields')) {
-                return $this->selectList();
+            $post = $this->request->post();
+            $rule = [];
+
+            // 获得源数据 
+            $row = $this->model->find($id);
+            if( !$row ){
+                $this->error('save faild, record not found');
             }
 
-            list($page, $limit, $where) = $this->buildTableParames();
-            $where[] = ['from_payable', '=', $id];
-            $count = $this->model
-                ->where($where)
-                ->count();
+            // 写入付款明细的数据
+            $data = array(
+                'fee' => $post['fee'],
+                // 'service_start' => $row['service_start'],
+                // 'service_end' => $row['service_end'],
+                'type' => $row['type'],
+                'supplier_name' => $row['supplier_name'],
+                'account' => $post['account'],
+                'project' => $row['project'],
+                'pay_date' => $post['pay_date'],
+                'remark' => '',
+                'handler' => $post['handler'],
+                'from_payable' => $row['id'],
+                'add_time' => date('Y-m-d H:i:s'),
+            );
+            $m = new CwPayment();
+            $m->save($data);
 
-            $sort = $this->sort;
-            if( isset($_GET['field']) ){
-                $sort = [
-                    $_GET['field'] => $_GET['order']
-                ];
-            }
-            $list = $this->model
-                ->where($where)
-                ->page($page, $limit)
-                ->order($sort)
-                ->select();
+            // 更新应收的数据
+            $payed = $row['payed_fee'] + $post['fee'];
+            $unpay = $row['fee'] - $payed;
+            $row->save(array(
+                'payed_fee' => $payed,
+                'unpay_fee' => $unpay,
+            ));
 
-            // 需要对数据进行汇总
-            $totals = $this->model->where($where)->field('sum(fee) as fee')->select()->toArray();
-
-            $data = [
-                'code'  => 0,
-                'msg'   => '',
-                'count' => $count,
-                'data'  => $list,
-                'totalRow' => [
-                    'id' => '汇总：',
-                    'fee' => sprintf('%0.2f', $totals[0]['fee']),
-                ]
-            ];
-            return json($data);
+            $this->success('保存成功');
         }
 
-        $this->assign('id', $id);
+        // get options
+        $accounts = $this->_getCol('account', new CwPayment());
+        $handlers = $this->_getCol('handler', new CwPayment());
+
+        $this->assign('accounts', $accounts);
+        $this->assign('handlers', $handlers);
         return $this->fetch();
     }
 }

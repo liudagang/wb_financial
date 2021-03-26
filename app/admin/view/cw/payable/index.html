@@ -1,0 +1,17 @@
+<div class="layuimini-container">
+    <div class="layuimini-main">
+        <table id="currentTable" class="layui-table layui-hide"
+               data-auth-add="{:auth('cw.payable/add')}"
+               data-auth-edit="{:auth('cw.payable/edit')}"
+               data-auth-delete="{:auth('cw.payable/delete')}"
+               lay-filter="currentTable">
+        </table>
+    </div>
+</div>
+
+<script>
+    g_opt = {
+        'supplier' : <?=json_encode($suppliers)?>,
+        'project' : <?=json_encode($projects)?>,
+    };
+    </script>
