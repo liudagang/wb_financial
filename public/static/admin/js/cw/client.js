@@ -92,6 +92,7 @@ define(["jquery", "easy-admin"], function ($, ea) {
                 toolbar: [],
                 defaultToolbar: [''],
                 page: false, // close pager
+                noDefaultToolbar: true,
                 cols: [[
                     // {type: 'checkbox'},
                     {field: 't', title: '发生日期', search:false, nosort:true},
