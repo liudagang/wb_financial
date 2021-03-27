@@ -201,6 +201,10 @@ define(["jquery", "tableSelect", "ckeditor"], function ($, tableSelect, undefine
                     }];
                 }
 
+                if( options.noDefaultToolbar != undefined ){
+                    options.defaultToolbar = [];
+                }
+
                 // 判断元素对象是否有嵌套的
                 options.cols = admin.table.formatCols(options.cols, options.init);
 

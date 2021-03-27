@@ -6,6 +6,7 @@ use app\common\controller\AdminController;
 use EasyAdmin\annotation\ControllerAnnotation;
 use EasyAdmin\annotation\NodeAnotation;
 use think\App;
+use think\facade\Db;
 
 /**
  * @ControllerAnnotation(title="cw_supplier")
@@ -124,6 +125,55 @@ class Supplier extends AdminController
         $this->assign('names', $this->_getCol('name'));
         $this->assign('srcs', $this->_getCol('src'));
         $this->assign('levels', $this->_getCol('level'));
+        return $this->fetch();
+    }
+
+
+    public function list($id)
+    {
+        if ($this->request->isAjax()) {
+            if (input('selectFields')) {
+                return $this->selectList();
+            }
+            $row = $this->model->find($id);
+            if( !$row ){
+                $this->error('record not found');
+            }
+
+            $list = Db::query("(SELECT pay_date AS t,'支出' as code,supplier_name,fee,`type`,project FROM ea_cw_payment WHERE supplier_name=:name ORDER BY t DESC)
+            UNION
+            (SELECT SUBSTR(add_time,1,10) AS t, '应付' AS CODE,supplier_name,fee,`type`,project FROM ea_cw_payable WHERE supplier_name=:name2 ORDER BY t DESC)", ['name'=>$row['name'], 'name2'=>$row['name']]);
+            /*
+            list($page, $limit, $where) = $this->buildTableParames();
+            $count = $this->model
+                ->where($where)
+                ->count();
+
+            $sort = $this->sort;
+            if( isset($_GET['field']) ){
+                $sort = [
+                    $_GET['field'] => $_GET['order']
+                ];
+            }
+            $list = $this->model
+                ->where($where)
+                ->page($page, $limit)
+                ->order($sort)
+                ->select();
+            */
+
+            // use source sql direct
+            
+
+            $data = [
+                'code'  => 0,
+                'msg'   => '',
+                'data'  => $list,
+            ];
+            return json($data);
+        }
+
+        $this->assign('id', $id);
         return $this->fetch();
     }
 }
