@@ -2,6 +2,7 @@
 
 namespace app\admin\controller\cw;
 
+use app\admin\model\CwPayable;
 use app\admin\model\CwSupplier;
 use app\common\controller\AdminController;
 use EasyAdmin\annotation\ControllerAnnotation;
@@ -268,6 +269,20 @@ class Payment extends AdminController
         $row = $this->model->whereIn('id', $id)->select();
         $row->isEmpty() && $this->error('数据不存在');
         try {
+            // 检查，是否有关联的应收，同时
+            $data = $row->toArray()[0];
+            if( $data['from_payable'] ){
+                $m = new CwPayable();
+                $r = $m->find($data['from_payable']);
+                if( $r ){
+                    // reset
+                    $r->save(array(
+                        'payed_fee' => $r['payed_fee'] - $data['fee'],
+                        'unpay_fee' => $r['unpay_fee'] + $data['fee'],
+                    ));
+                }
+            }
+
             $save = $row->delete();
         } catch (\Exception $e) {
             $this->error('删除失败');

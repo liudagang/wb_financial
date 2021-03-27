@@ -6,6 +6,7 @@ use app\common\controller\AdminController;
 use EasyAdmin\annotation\ControllerAnnotation;
 use EasyAdmin\annotation\NodeAnotation;
 use think\App;
+use think\facade\Db;
 
 /**
  * @ControllerAnnotation(title="cw_client")
@@ -142,30 +143,51 @@ class Client extends AdminController
         $save ? $this->success('删除成功') : $this->error('删除失败');
     }
 
-    /**
-     * @NodeAnotation(title="导出")
-     */
-    public function export()
+    public function list($id)
     {
-        list($page, $limit, $where) = $this->buildTableParames();
-        $tableName = $this->model->getName();
-        $tableName = CommonTool::humpToLine(lcfirst($tableName));
-        $prefix = config('database.connections.mysql.prefix');
-        $dbList = Db::query("show full columns from {$prefix}{$tableName}");
-        $header = [];
-        foreach ($dbList as $vo) {
-            $comment = !empty($vo['Comment']) ? $vo['Comment'] : $vo['Field'];
-            if (!in_array($vo['Field'], $this->noExportFields)) {
-                $header[] = [$comment, $vo['Field']];
+        if ($this->request->isAjax()) {
+            if (input('selectFields')) {
+                return $this->selectList();
             }
+            $row = $this->model->find($id);
+            if( !$row ){
+                $this->error('record not found');
+            }
+
+            $list = Db::query("(SELECT income_date AS t,'收入' as code,client_name,fee,`type`,project FROM ea_cw_income WHERE client_name=:name ORDER BY t DESC)
+            UNION
+            (SELECT SUBSTR(add_time,1,10) AS t, '应收' AS CODE,client_name,fee,`type`,project FROM ea_cw_receivable WHERE client_name=:name2 ORDER BY t DESC)", ['name'=>$row['name'], 'name2'=>$row['name']]);
+            /*
+            list($page, $limit, $where) = $this->buildTableParames();
+            $count = $this->model
+                ->where($where)
+                ->count();
+
+            $sort = $this->sort;
+            if( isset($_GET['field']) ){
+                $sort = [
+                    $_GET['field'] => $_GET['order']
+                ];
+            }
+            $list = $this->model
+                ->where($where)
+                ->page($page, $limit)
+                ->order($sort)
+                ->select();
+            */
+
+            // use source sql direct
+            
+
+            $data = [
+                'code'  => 0,
+                'msg'   => '',
+                'data'  => $list,
+            ];
+            return json($data);
         }
-        $list = $this->model
-            ->where($where)
-            ->limit(100000)
-            ->order('id', 'desc')
-            ->select()
-            ->toArray();
-        $fileName = time();
-        return Excel::exportData($list, $header, $fileName, 'xlsx');
+
+        $this->assign('id', $id);
+        return $this->fetch();
     }
 }
